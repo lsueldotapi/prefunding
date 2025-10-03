@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tapi-green: #00D54B;
+  --tapi-dark-green: #0A3B1D;
+  --tapi-black: #000000;
+  --tapi-white: #FFFFFF;
+}
+
+.bg-tapi-gradient {
+  background: linear-gradient(135deg, var(--tapi-dark-green) 0%, var(--tapi-green) 100%);
+  background-color: var(--tapi-dark-green);
+}
+
+.text-tapi-green {
+  color: var(--tapi-green);
+}
+
+.bg-tapi-green {
+  background-color: var(--tapi-green);
+}
+
+.hover\:bg-tapi-green:hover {
+  background-color: var(--tapi-green);
+}
+
+.text-tapi-dark {
+  color: var(--tapi-dark-green);
+}
+
+.bg-tapi-dark {
+  background-color: var(--tapi-dark-green);
+}
+
+.border-tapi-green {
+  border-color: var(--tapi-green);
+}
+
+.hover\:border-tapi-green:hover {
+  border-color: var(--tapi-green);
+}
+
+.glow-button {
+  box-shadow: 0 0 20px rgba(0, 213, 75, 0.3);
+  transition: all 0.3s ease;
+}
+
+.glow-button:hover {
+  box-shadow: 0 0 30px rgba(0, 213, 75, 0.5);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* PIN Input Styles */
+.pin-input {
+  font-family: monospace;
+  letter-spacing: 0.5em;
+  text-align: center;
+  font-size: 1.5em;
+  padding: 0.5em;
+  width: 100%;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.pin-input:focus {
+  outline: none;
+  border-color: var(--tapi-green);
+  box-shadow: 0 0 0 3px rgba(0, 213, 75, 0.2);
+}
+
+.pin-input::placeholder {
+  letter-spacing: 0.2em;
+}
