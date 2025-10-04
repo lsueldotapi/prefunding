@@ -134,7 +134,8 @@ function FundingPageV2() {
           client_id: clientId,
           amount: amountNumber,
           wallet_address: '0x1234567890',
-          status: 'pending'
+          status: 'pending',
+          processed_at: new Date().toISOString()
         });
 
       if (error) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Wallet, KeyRound, CheckCircle } from 'lucide-react';
-import { fetchClient } from '../lib/supabase';
+import { fetchClient, supabase } from '../lib/supabase';
 import type { Client, FundingFormData } from '../lib/types';
 import { TapiLogo } from '../components/TapiLogo';
 
@@ -122,6 +122,8 @@ function FundingPage() {
         client_id: clientId,
         amount: amountNumber,
         wallet_address: '0x1234567890',
+        status: 'pending',
+        processed_at: new Date().toISOString()
       });
 
     if (error) {
