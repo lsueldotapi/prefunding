@@ -161,17 +161,17 @@ function FundingPageV2() {
           <h1 className="text-3xl font-bold text-tapi-dark mb-4">
             ¡Solicitud Completada!
           </h1>
-          <p className="text-gray-600 text-lg mb-4">
+          <p className="text-gray-600 text-lg mb-6">
             Tu solicitud de prefondeo ha sido procesada correctamente.
           </p>
-          <div className="bg-tapi-green bg-opacity-10 p-4 rounded-xl mb-4">
-            <p className="text-sm text-gray-600 mb-1">Monto transferido:</p>
-            <p className="text-3xl font-bold text-tapi-green">
+          <div className="bg-tapi-green bg-opacity-10 p-6 rounded-xl mb-6">
+            <p className="text-sm text-gray-600 mb-2">Monto transferido:</p>
+            <p className="text-4xl font-bold text-tapi-green">
               ${formatDisplayAmount(submittedAmount)}
             </p>
           </div>
           <p className="text-sm text-gray-500">
-            Sistema Regalii
+            Muchas gracias
           </p>
         </div>
       </div>
