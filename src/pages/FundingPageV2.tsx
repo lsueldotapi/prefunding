@@ -164,11 +164,13 @@ function FundingPageV2() {
           <p className="text-gray-600 text-lg mb-6">
             Tu solicitud de prefondeo ha sido procesada correctamente.
           </p>
-          <div className="bg-tapi-green bg-opacity-10 p-6 rounded-xl mb-6">
-            <p className="text-sm text-gray-600 mb-2">Monto transferido:</p>
-            <p className="text-4xl font-bold text-tapi-green">
-              ${formatDisplayAmount(submittedAmount)}
-            </p>
+          <div className="bg-gradient-to-r from-tapi-green to-green-500 p-8 rounded-2xl mb-6 shadow-lg">
+            <div className="text-center">
+              <p className="text-white text-sm font-medium mb-3 opacity-90">Monto transferido</p>
+              <p className="text-white text-5xl font-bold drop-shadow-lg">
+                ${formatDisplayAmount(submittedAmount)}
+              </p>
+            </div>
           </div>
           <p className="text-sm text-gray-500">
             Muchas gracias
