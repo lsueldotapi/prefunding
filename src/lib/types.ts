@@ -4,6 +4,7 @@ export interface Client {
   country_code: string;
   created_at: string;
   pin: number;
+  vertical?: string;
 }
 
 export interface PrefundingRequest {

@@ -62,6 +62,7 @@ function AdminPageV2() {
               <thead>
                 <tr className="border-b-2 border-gray-100">
                   <th className="text-left py-4 px-6 font-medium text-gray-700 text-lg">CLIENTE</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-700 text-lg">VERTICAL</th>
                   <th className="text-left py-4 px-6 font-medium text-gray-700 text-lg">PAÍS</th>
                   <th className="text-left py-4 px-6 font-medium text-gray-700 text-lg">ENLACE REGALII</th>
                   <th className="text-right py-4 px-6 font-medium text-gray-700 text-lg">ACCIONES</th>
@@ -74,6 +75,9 @@ function AdminPageV2() {
                     <tr key={client.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="py-4 px-6">
                         <div className="font-medium text-gray-800 text-lg">{client.client_company_name}</div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-gray-600 font-medium">{client.vertical || 'N/A'}</div>
                       </td>
                       <td className="py-4 px-6">
                         <div className="text-gray-600">{client.country_code}</div>
