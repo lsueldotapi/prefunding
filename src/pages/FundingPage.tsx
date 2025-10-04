@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Wallet, KeyRound, CheckCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { fetchClient } from '../lib/supabase';
 import type { Client, FundingFormData } from '../lib/types';
 import { TapiLogo } from '../components/TapiLogo';
 
@@ -19,13 +19,11 @@ function FundingPage() {
   const pinInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    async function fetchClient() {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', clientId)
-        .single();
-
+    async function loadClient() {
+      if (!clientId) return;
+      
+      const { data, error } = await fetchClient(clientId, 'clients');
+      
       if (error) {
         console.error('Error fetching client:', error);
         return;
@@ -34,7 +32,7 @@ function FundingPage() {
       setClient(data);
     }
 
-    fetchClient();
+    loadClient();
 
     if (pinInputRef.current) {
       pinInputRef.current.focus();

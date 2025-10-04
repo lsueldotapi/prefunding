@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClipboardCopy } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { fetchClients } from '../lib/supabase';
 import type { Client } from '../lib/types';
 import { TapiLogo } from '../components/TapiLogo';
 
@@ -11,12 +11,9 @@ function AdminPage() {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchClients() {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('client_company_name');
-
+    async function loadClients() {
+      const { data, error } = await fetchClients('clients');
+      
       if (error) {
         console.error('Error fetching clients:', error);
         return;
@@ -25,7 +22,7 @@ function AdminPage() {
       setClients(data || []);
     }
 
-    fetchClients();
+    loadClients();
   }, []);
 
   const copyToClipboard = (link: string) => {
