@@ -19,28 +19,43 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Create a single supabase client for the entire app
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: false
+    persistSession: false,
+    autoRefreshToken: false
+  },
+  global: {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
   }
 });
 
-// Enhanced connection test function
-export async function testConnection() {
+// Function to test CORS and basic connectivity
+export async function testCorsConnection() {
   try {
-    console.log('🔌 Testing Supabase connection...');
+    console.log('🌐 Testing CORS and basic connectivity...');
     
-    // Test basic connection with a simple query
-    const { data, error } = await supabase.from('clients').select('count').limit(1);
+    // Test basic connectivity to Supabase
+    const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
     
-    if (error) {
-      console.error('❌ Supabase connection error:', error);
-      return { success: false, error: error.message };
+    if (response.ok) {
+      console.log('✅ Basic connectivity to Supabase successful');
+      return { success: true, message: 'Basic connectivity OK' };
+    } else {
+      console.error('❌ Basic connectivity failed:', response.status, response.statusText);
+      return { success: false, error: `HTTP ${response.status}: ${response.statusText}` };
     }
-    
-    console.log('✅ Supabase connection successful');
-    return { success: true, data };
   } catch (error) {
-    console.error('❌ Unexpected error connecting to Supabase:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    console.error('❌ CORS/Network error:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Network error' };
   }
 }
 

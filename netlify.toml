@@ -3,12 +3,25 @@
   publish = "dist"
   command = "npm run build"
 
+# Headers for CORS
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, apikey"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Handle preflight requests
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, apikey"
+
+# Redirects for SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[[headers]]
-  for = "/*"
-    [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"

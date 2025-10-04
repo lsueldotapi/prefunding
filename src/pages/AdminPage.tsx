@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClipboardCopy } from 'lucide-react';
-import { fetchClients } from '../lib/supabase';
+import { fetchClients, testCorsConnection } from '../lib/supabase';
 import type { Client } from '../lib/types';
 import { TapiLogo } from '../components/TapiLogo';
 
@@ -12,6 +12,12 @@ function AdminPage() {
 
   useEffect(() => {
     async function loadClients() {
+      // First test CORS connectivity
+      const corsTest = await testCorsConnection();
+      if (!corsTest.success) {
+        console.error('CORS test failed, but continuing with data fetch...');
+      }
+      
       const { data, error } = await fetchClients('clients');
       
       if (error) {
