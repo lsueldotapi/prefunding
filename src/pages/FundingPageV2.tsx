@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Wallet, KeyRound, CheckCircle } from 'lucide-react';
-import { fetchClient } from '../lib/supabase';
+import { fetchClient, supabase } from '../lib/supabase';
 import type { Client, FundingFormData } from '../lib/types';
 import { TapiLogo } from '../components/TapiLogo';
 
@@ -114,26 +114,41 @@ function FundingPageV2() {
 
     const amountNumber = parseFloat(formData.amount);
     if (isNaN(amountNumber) || amountNumber <= 0) {
+      console.error('Invalid amount:', formData.amount);
       return;
     }
+
+    console.log('🚀 Submitting prefunding request...', {
+      clientId,
+      amount: amountNumber,
+      client: client?.client_company_name
+    });
 
     setSubmittedAmount(formData.amount);
 
-    const { error } = await supabase
-      .from('prefunding_v2')
-      .insert({
-        id: crypto.randomUUID(),
-        client_id: clientId,
-        amount: amountNumber,
-        wallet_address: '0x1234567890',
-      });
+    try {
+      const { data, error } = await supabase
+        .from('prefunding_v2')
+        .insert({
+          id: crypto.randomUUID(),
+          client_id: clientId,
+          amount: amountNumber,
+          wallet_address: '0x1234567890',
+          status: 'pending'
+        });
 
-    if (error) {
-      console.error('Error submitting prefunding request:', error);
-      return;
+      if (error) {
+        console.error('❌ Error submitting prefunding request:', error);
+        alert('Error al procesar la solicitud. Por favor, intenta nuevamente.');
+        return;
+      }
+
+      console.log('✅ Prefunding request submitted successfully:', data);
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('❌ Unexpected error:', error);
+      alert('Error inesperado. Por favor, intenta nuevamente.');
     }
-
-    setIsSubmitted(true);
   };
 
   if (isSubmitted) {
