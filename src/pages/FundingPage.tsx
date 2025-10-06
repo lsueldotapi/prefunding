@@ -243,7 +243,7 @@ function FundingPage() {
       </h1>
 
       <p className="text-gray-600 text-center text-lg mb-8">
-        Hola {client.client_company_name}, por favor, ingresa el monto a transferir
+        Hola {client.client_company_name} - {client.vertical || 'N/A'}, por favor, ingresa el monto a transferir
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
