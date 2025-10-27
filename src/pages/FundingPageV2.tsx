@@ -187,19 +187,21 @@ function FundingPageV2() {
         const fileExt = receiptFile.name.split('.').pop();
         const fileName = `${clientId}_${Date.now()}.${fileExt}`;
         
+        console.log('📤 Uploading file:', fileName);
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('prefunding-receipts')
-          .upload(fileName, receiptFile, {
-            cacheControl: '3600',
-            upsert: false
-          });
+          .upload(fileName, receiptFile);
 
         if (uploadError) {
           console.error('❌ Error uploading file:', uploadError);
-          alert('Error al subir el archivo. Por favor, intenta nuevamente.');
+          console.error('Error details:', JSON.stringify(uploadError, null, 2));
+          alert(`Error al subir el archivo: ${uploadError.message}. Por favor, verifica que el bucket de storage esté configurado correctamente.`);
           setIsUploading(false);
           return;
         }
+
+        console.log('✅ Upload successful:', uploadData);
 
         // Get public URL
         const { data: urlData } = supabase.storage
