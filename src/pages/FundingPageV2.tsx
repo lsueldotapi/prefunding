@@ -19,6 +19,7 @@ function FundingPageV2() {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const pinInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function loadClient() {
@@ -123,14 +124,30 @@ function FundingPageV2() {
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
       if (!validTypes.includes(file.type)) {
         alert('Por favor, selecciona un archivo PDF, JPG o PNG');
+        // Reset input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         return;
       }
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('El archivo debe ser menor a 5MB');
+        // Reset input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         return;
       }
       setReceiptFile(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setReceiptFile(null);
+    // Reset the input value
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -368,11 +385,12 @@ function FundingPageV2() {
             </label>
             <div className="relative">
               <input
+                ref={fileInputRef}
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={handleFileChange}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-tapi-green focus:border-transparent transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-tapi-green file:text-white hover:file:bg-tapi-dark"
-                required={needsReceipt()}
+                required={needsReceipt() && !receiptFile}
               />
               {!receiptFile && (
                 <p className="mt-2 text-xs text-gray-500">
@@ -390,7 +408,7 @@ function FundingPageV2() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setReceiptFile(null)}
+                    onClick={handleRemoveFile}
                     className="text-red-600 hover:text-red-800 text-sm"
                   >
                     Eliminar
@@ -403,7 +421,7 @@ function FundingPageV2() {
 
         <button
           type="submit"
-          disabled={!formData.amount || isUploading}
+          disabled={!formData.amount || isUploading || (needsReceipt() && !receiptFile)}
           className="w-full bg-tapi-green text-white rounded-xl py-4 px-6 font-medium hover:bg-tapi-dark transition-all duration-300 glow-button text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isUploading ? 'Subiendo...' : 'Confirmar Transferencia →'}
