@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Wallet, KeyRound, CheckCircle } from 'lucide-react';
+import { Wallet, KeyRound, CheckCircle, Upload, FileText } from 'lucide-react';
 import { fetchClient, supabase } from '../lib/supabase';
 import type { Client, FundingFormData } from '../lib/types';
 import { TapiLogo } from '../components/TapiLogo';
@@ -16,6 +16,8 @@ function FundingPageV2() {
   const [formData, setFormData] = useState<FundingFormData>({
     amount: '',
   });
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const pinInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -109,6 +111,29 @@ function FundingPageV2() {
     }).format(numericAmount);
   };
 
+  // Check if vertical is NOT Bill payments (needs receipt)
+  const needsReceipt = () => {
+    return client?.vertical && client.vertical.toLowerCase() !== 'bill payments';
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        alert('Por favor, selecciona un archivo PDF, JPG o PNG');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('El archivo debe ser menor a 5MB');
+        return;
+      }
+      setReceiptFile(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -118,15 +143,58 @@ function FundingPageV2() {
       return;
     }
 
+    // Check if receipt is required
+    const requiresReceipt = needsReceipt();
+    if (requiresReceipt && !receiptFile) {
+      alert('Por favor, adjunta el comprobante de transferencia');
+      return;
+    }
+
+    setIsUploading(true);
+    setSubmittedAmount(formData.amount);
+
     console.log('🚀 Submitting prefunding request...', {
       clientId,
       amount: amountNumber,
-      client: client?.client_company_name
+      client: client?.client_company_name,
+      requiresReceipt,
+      hasFile: !!receiptFile
     });
 
-    setSubmittedAmount(formData.amount);
-
     try {
+      let receiptUrl: string | undefined;
+      let receiptFileName: string | undefined;
+
+      // Upload receipt file if required
+      if (requiresReceipt && receiptFile) {
+        const fileExt = receiptFile.name.split('.').pop();
+        const fileName = `${clientId}_${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('prefunding-receipts')
+          .upload(fileName, receiptFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('❌ Error uploading file:', uploadError);
+          alert('Error al subir el archivo. Por favor, intenta nuevamente.');
+          setIsUploading(false);
+          return;
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('prefunding-receipts')
+          .getPublicUrl(fileName);
+
+        receiptUrl = urlData.publicUrl;
+        receiptFileName = receiptFile.name;
+        console.log('✅ File uploaded successfully:', receiptUrl);
+      }
+
+      // Insert prefunding record
       const { data, error } = await supabase
         .from('prefunding_v2')
         .insert({
@@ -135,12 +203,15 @@ function FundingPageV2() {
           amount: amountNumber,
           wallet_address: '0x1234567890',
           status: 'pending',
-          processed_at: new Date().toISOString()
+          processed_at: new Date().toISOString(),
+          receipt_url: receiptUrl,
+          receipt_file_name: receiptFileName
         });
 
       if (error) {
         console.error('❌ Error submitting prefunding request:', error);
         alert('Error al procesar la solicitud. Por favor, intenta nuevamente.');
+        setIsUploading(false);
         return;
       }
 
@@ -149,6 +220,7 @@ function FundingPageV2() {
     } catch (error) {
       console.error('❌ Unexpected error:', error);
       alert('Error inesperado. Por favor, intenta nuevamente.');
+      setIsUploading(false);
     }
   };
 
@@ -289,12 +361,52 @@ function FundingPageV2() {
           )}
         </div>
 
+        {needsReceipt() && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Comprobante de Transferencia <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleFileChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-tapi-green focus:border-transparent transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-tapi-green file:text-white hover:file:bg-tapi-dark"
+                required={needsReceipt()}
+              />
+              {!receiptFile && (
+                <p className="mt-2 text-xs text-gray-500">
+                  Formatos aceptados: PDF, JPG, PNG (máx. 5MB)
+                </p>
+              )}
+              {receiptFile && (
+                <div className="mt-3 flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <FileText className="h-5 w-5 text-green-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800">{receiptFile.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {(receiptFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReceiptFile(null)}
+                    className="text-red-600 hover:text-red-800 text-sm"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
-          disabled={!formData.amount}
+          disabled={!formData.amount || isUploading}
           className="w-full bg-tapi-green text-white rounded-xl py-4 px-6 font-medium hover:bg-tapi-dark transition-all duration-300 glow-button text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Confirmar Transferencia →
+          {isUploading ? 'Subiendo...' : 'Confirmar Transferencia →'}
         </button>
       </form>
     </FormContainer>

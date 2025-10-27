@@ -23,8 +23,10 @@ export interface PrefundingV2Request {
   amount: number;
   status: string;
   processed_at: string;
+  receipt_url?: string;
+  receipt_file_name?: string;
 }
 
 export interface FundingFormData {
-  amount: number;
+  amount: string;
 }
